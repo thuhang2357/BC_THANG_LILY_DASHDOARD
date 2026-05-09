@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo Cáo Tài Chính - ULTD Thịnh Phát</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { height: 100%; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f7fa; padding: 20px; min-height: 100%; }
+        .header { background: linear-gradient(135deg, #1a5276, #2980b9); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .header h1 { font-size: 1.5rem; }
+        .header p { font-size: 0.9rem; opacity: 0.9; }
+        .filter-bar { background: white; border-radius: 10px; padding: 15px 20px; margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .filter-label { font-weight: 600; color: #1a5276; }
+        .filter-bar select { padding: 8px 15px; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem; }
+        .kpi-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .kpi-title { font-size: 0.85rem; color: #666; text-transform: uppercase; }
+        .kpi-value { font-size: 1.6rem; font-weight: 700; color: #1a5276; margin: 10px 0; }
+        .kpi-diff { font-size: 0.9rem; margin-top: 5px; }
+        .kpi-link { text-decoration: none; color: inherit; display: block; cursor: pointer; }
+        .kpi-link:hover .kpi-value { color: #2980b9; text-decoration: underline; }
+        .chart-container { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .positive { color: #27ae60; }
+        .negative { color: #e74c3c; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #1a5276; color: white; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; }
+        th.col-month { background: #2980b9; }
+        th.col-diff { background: #27ae60; }
+        th.col-reason { background: #8e44ad; white-space: normal; min-width: 250px; }
+        td:not(.amount) { white-space: normal; }
+        tr:hover { background: #f8f9fa; }
+        .amount { text-align: right; font-weight: 500; }
+        .diff-up { color: #27ae60; font-weight: 600; }
+        .diff-down { color: #e74c3c; font-weight: 600; }
+        .text-green { color: #27ae60; font-weight: 600; }
+        .text-red { color: #e74c3c; font-weight: 600; }
+        td .reason { font-size: 0.7rem; line-height: 1.4; display: block; white-space: pre-line; }
+        td .reason a { color: #1a5276; text-decoration: none; border-bottom: 1px dotted #1a5276; cursor: pointer; }
+        td .reason a:hover { color: #2980b9; border-bottom-style: solid; }
+        td .reason .section { margin: 2px 0; }
+        td .reason .label { color: #666; font-weight: 500; }
+        td .reason .ch-breakdown { padding-left: 10px; font-size: 0.68rem; color: #555; border-left: 2px solid #ddd; margin: 4px 0; }
+        td .reason .ch-breakdown div { margin: 1px 0; }
+        td .reason .ch-formula { font-size: 0.65rem; color: #888; padding-left: 10px; margin: 1px 0; }
+        td .reason .mini-link { color: #1a5276; text-decoration: none; font-size: 0.65rem; border-bottom: 1px dotted #1a5276; cursor: pointer; }
+        td .reason .mini-link:hover { color: #2980b9; }
+        .exp-reason { font-size: 0.7rem; line-height: 1.4; }
+        .exp-reason div { margin: 2px 0; }
+        .exp-items { font-size: 0.65rem; color: #666; margin-top: 4px; }
+        .exp-detail { font-size: 0.7rem; color: #555; margin-top: 4px; line-height: 1.4; }
+        td .amount { text-align: right; font-weight: 500; }
+        h2 { color: #1a5276; margin: 20px 0 10px 0; }
+        .trend-charts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin: 20px 0; }
+        .trend-section { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .trend-section h3 { color: #1a5276; font-size: 1rem; margin-bottom: 15px; text-align: center; }
+        .trend-chart { display: flex; align-items: flex-end; justify-content: space-around; height: 250px; padding: 20px 10px; border-bottom: 2px solid #eee; }
+        .trend-bar-wrapper { display: flex; flex-direction: column; align-items: center; flex: 1; max-width: 100px; }
+        .trend-bar-value { font-size: 0.75rem; font-weight: 600; color: #333; text-align: center; margin-bottom: 8px; min-height: 20px; }
+        .trend-bar { width: 60px; background: linear-gradient(to top, #1a5276, #2980b9); border-radius: 4px 4px 0 0; min-height: 20px; transition: height 0.3s ease; margin-bottom: 8px; }
+        .trend-bar:hover { background: linear-gradient(to top, #2980b9, #3498db); }
+        .trend-bar-label { font-size: 0.8rem; color: #666; text-align: center; margin-top: auto; }
+        .trend-bar.positive { background: linear-gradient(to top, #27ae60, #2ecc71); }
+        .trend-bar.negative { background: linear-gradient(to top, #e74c3c, #c0392b); }
+        .trend-change { font-size: 0.7rem; margin-top: 4px; text-align: center; }
+        .trend-change.up { color: #27ae60; }
+        .trend-change.down { color: #e74c3c; }
+        .channel-name { font-size: 0.9rem; color: #666; }
+        .channel-value { font-size: 1.2rem; font-weight: 700; color: #1a5276; margin: 5px 0; }
+        .channel-detail { font-size: 0.8rem; color: #888; }
+        .note-box { background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin-top: 10px; font-size: 0.9rem; }
+        .sticky-header { position: sticky; top: 0; z-index: 100; background: #f5f7fa; padding: 10px 0; }
+        .sticky-header .header { margin-bottom: 15px; }
+        .sticky-header .filter-bar { margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .sticky-header .kpi-row { display: flex; gap: 15px; flex-wrap: wrap; }
+        .sticky-header .kpi-row .kpi-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex: 1; min-width: 200px; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal.show { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; border-radius: 10px; padding: 20px; width: 90%; max-width: 900px; max-height: 80vh; overflow: auto; position: relative; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #1a5276; padding-bottom: 10px; }
+        .modal-header h3 { color: #1a5276; margin: 0; }
+        .modal-close { background: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-size: 1rem; }
+        .modal-close:hover { background: #c0392b; }
+        .kpi-card.clickable { cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .kpi-card.clickable:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        td.clickable { cursor: pointer; color: #1a5276; text-decoration: underline; }
+        td.clickable:hover { color: #2980b9; }
+        tr.exp-row:hover { background: #f0f7ff; }
+        .kpi-link { text-decoration: none; color: inherit; display: block; }
+    </style>
+</head>
+<body>
+    <div class="sticky-header">
+        <div class="header">
+            <h1>Công Ty Cổ Phần ULTD Thịnh Phát</h1>
+            <p>Báo Cáo Tài Chính - Cập nhật: 2026-05-09</p>
+        </div>
+
+        <div class="filter-bar">
+            <span class="filter-label">So sánh 2 tháng:</span>
+            <select id="month1">
+                <option value="0">Tháng 1</option>
+                <option value="1" selected>Tháng 2</option>
+                <option value="2">Tháng 3</option>
+            </select>
+            <span>vs</span>
+            <select id="month2">
+                <option value="0">Tháng 1</option>
+                <option value="1">Tháng 2</option>
+                <option value="2" selected>Tháng 3</option>
+            </select>
+        </div>
+
+        <div class="kpi-row">
+            <a href="#" class="kpi-link" id="kpi-revenue-link">
+                <div class="kpi-card clickable">
+                    <div class="kpi-title">Doanh Thu Thuần</div>
+                    <div class="kpi-value" id="kpi-revenue">-</div>
+                    <div class="kpi-diff" id="kpi-revenue-diff"></div>
+                </div>
+            </a>
+            <a href="#" class="kpi-link" id="kpi-profit-link">
+                <div class="kpi-card clickable">
+                    <div class="kpi-title">Lợi Nhuận</div>
+                    <div class="kpi-value" id="kpi-profit">-</div>
+                    <div class="kpi-diff" id="kpi-profit-diff"></div>
+                </div>
+            </a>
+            <a href="#" class="kpi-link" id="kpi-margin-link">
+                <div class="kpi-card clickable">
+                    <div class="kpi-title">Tỷ Suất LN</div>
+                    <div class="kpi-value" id="kpi-margin">-</div>
+                    <div class="kpi-diff" id="kpi-margin-diff"></div>
+                </div>
+            </a>
+            <a href="#" class="kpi-link" id="kpi-expense-link">
+                <div class="kpi-card clickable">
+                    <div class="kpi-title">Chi Phí</div>
+                    <div class="kpi-value" id="kpi-expense">-</div>
+                    <div class="kpi-diff" id="kpi-expense-diff"></div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <h2>Tổng Hợp</h2>
+    <table id="summary-table">
+        <thead><tr><th>Chỉ tiêu</th><th class="col-month" id="th-month1">Tháng 1</th><th class="col-month" id="th-month2">Tháng 2</th><th class="col-diff">Chênh lệch</th><th class="col-reason">Nhận xét</th></tr></thead>
+        <tbody></tbody>
+    </table>
+
+    <h2>Chi Phí</h2>
+    <table id="expense-table">
+        <thead><tr><th>Loại chi phí</th><th class="col-month" id="th-exp-month1">Tháng 1</th><th class="col-month" id="th-exp-month2">Tháng 2</th><th class="col-diff">Chênh lệch</th><th class="col-reason">Nhận xét</th></tr></thead>
+        <tbody></tbody>
+    </table>
+
+    <!-- Trend Charts -->
+    <div class="trend-charts">
+        <div class="trend-section">
+            <h3>Xu hướng Doanh thu thuần theo Tháng</h3>
+            <div class="trend-chart" id="trend-revenue"></div>
+        </div>
+        <div class="trend-section">
+            <h3>Xu hướng Lợi nhuận Kế toán trước Thuế theo Tháng</h3>
+            <div class="trend-chart" id="trend-net-profit"></div>
+        </div>
+    </div>
+
+    <script>
+        var data = {
+    months: ["Tháng 01", "Tháng 02", "Tháng 03"],
+    monthKeys: ["01", "02", "03"],
+    selectedMonths: [0, 1, 2],
+    summary: {
+        revenue: [21213664770, 22370281393, 25006659252],
+        revenueDiscount: [4765686041, 4471573844, 4290664121],
+        netRevenue: [16447978729, 17898707549, 20715995131],
+        cogs: [5808244302, 6334658083, 6690056300],
+        grossProfit: [10639734427, 11564049466, 14025938831],
+        sellingExpense: [6361170144, 5893273451, 7298613288],
+        managementExpense: [4302304311, 4666746169, 5599533426],
+        netProfit: [-10826144, 1068429882, 1123728119],
+        cash: []
+    },
+    growth: {
+        revenue: [null, 5.5, 11.8],
+        grossProfit: [null, 8.7, 21.3],
+        netProfit: [null, 9969.0, 5.2]
+    },
+    expenses: {
+        nhan_su: [3236405837, 3671434434, 3766645466],
+        thue_khau_hao: [2665945124, 2728383265, 2878871267],
+        san_tmdt: [1733358414, 1542344003, 2125211229],
+        quang_cao_marketing: [923163109, 848314638, 1218242139],
+        van_chuyen: [133490413, 53437210, 258003827],
+        dien_nuoc_dich_vu: [464250414, 535656659, 477410797],
+        chi_phi_van_hanh: [324171364, 317016569, 332518351],
+        khac: [356802698, 208830088, 281993924]
+    },
+    channels: {
+        north: {
+            revenue: [7763912574, 9070660323, 9332237616],
+            netRevenue: [6637496733, 7745006264, 8110239408],
+            cogs: [2509032831, 2928900446, 2976751846],
+            grossProfit: [4128463902, 4816105818, 5133487562],
+            grossMargin: [62.199110117437705, 62.18336891973881, 63.29637515923747],
+            sellingExpense: [1944945792, 1735920134, 1726051886],
+            managementExpense: [1870514464, 1982059819, 2095399056],
+            totalExpense: [3815460256, 3717979953, 3821450942],
+            expenseRatio: [57.48342198091746, 48.004866959007536, 47.11884261062001],
+            netProfit: [303670369, 1093304693, 1291304158],
+            netMargin: [4.575073724559828, 14.116253179572638, 15.92189937976736]
+        },
+        south: {
+            revenue: [5280871169, 5475823115, 6135033595],
+            netRevenue: [4435072778, 4635523831, 5250908409],
+            cogs: [1623418256, 1658563215, 1875213312],
+            grossProfit: [2811654522, 2976960616, 3375695097],
+            grossMargin: [63.395904931867165, 64.22058702603614, 64.28783048689432],
+            sellingExpense: [1961520777, 1811374237, 2054173737],
+            managementExpense: [1694624936, 1923767122, 1896644343],
+            totalExpense: [3656145713, 3735141359, 3950818080],
+            expenseRatio: [82.43710748414689, 80.5764676264049, 75.24065880159594],
+            netProfit: [-848755563, -762700123, -588207441],
+            netMargin: [-19.137353668923264, -16.45337508351168, -11.202012969638146]
+        },
+        central: {
+            revenue: [894005914, 1219955562, 975301359],
+            netRevenue: [745677814, 1027122640, 845635786],
+            cogs: [285976847, 382713292, 301368907],
+            grossProfit: [459700967, 644409348, 544266879],
+            grossMargin: [61.64873868702764, 62.73927989748137, 64.36185506936434],
+            sellingExpense: [272894849, 268841720, 283050259],
+            managementExpense: [233701808, 247664144, 261749882],
+            totalExpense: [506596657, 516505864, 544800141],
+            expenseRatio: [67.93774033352157, 50.28667891109868, 64.42491555105498],
+            netProfit: [-47117552, 127290900, -3677256],
+            netMargin: [-6.3187547108649795, 12.392960201909286, -0.43485103881353476]
+        },
+        tmdt: {
+            revenue: [6964126739, 6292232739, 8011302352],
+            netRevenue: [3075237977, 3058938051, 4290936815],
+            cogs: [1330240587, 1251429854, 1528626417],
+            grossProfit: [1744997390, 1807508197, 2762310398],
+            grossMargin: [56.74349117209799, 59.08940184025976, 64.37546198172112],
+            sellingExpense: [665147411, 715895541, 941942223],
+            managementExpense: [234278557, 250043677, 268043787],
+            totalExpense: [899425968, 965939218, 1209986010],
+            expenseRatio: [29.247361496147395, 31.577599869478362, 28.198644309331318],
+            netProfit: [845492060, 840966395, 1551286394],
+            netMargin: [27.493548997622824, 27.492102846773214, 36.15262729055124]
+        },
+        online: {
+            revenue: [313474120, 314420880, 483471970],
+            netRevenue: [313474120, 314420880, 483471970],
+            cogs: [59575779, 113051269, 8095830],
+            grossProfit: [253898341, 201369611, 475376140],
+            grossMargin: [80.99499282428802, 64.04460511655587, 98.32548099944657],
+            sellingExpense: [183103823, 151334767, 165518804],
+            managementExpense: [234246250, 247851226, 261615406],
+            totalExpense: [417350073, 399185993, 427134210],
+            expenseRatio: [133.137010800126, 126.95912338900648, 88.34725413347128],
+            netProfit: [-163531094, -198418966, 47203936],
+            netMargin: [-52.16733489833227, -63.10616712223438, 9.763531068822873]
+        }
+    }
+};
+    </script>
+    <script src="expense_detail_summary.js"></script>
+    <script>
+
+        function fmt(v) { return formatCurrency(v) + ' đ'; }
+        function fmtDiff(v) {
+            var prefix = v >= 0 ? '+' : '';
+            return prefix + formatCurrency(Math.abs(v)) + ' đ';
+        }
+        function formatCurrency(v) {
+            return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+        function getDiffClass(v) { return v >= 0 ? 'diff-up' : 'diff-down'; }
+        function getSign(v) { return v >= 0 ? '▲' : '▼'; }
+
+        // Expense category details - sub-items and Vietnamese names
+        var expenseCategoryDetails = {
+            'nhan_su': {
+                title: 'Nhân sự',
+                items: ['Tiền lương (TL)', 'Bảo hiểm xã hội (BHXH)', 'Công đoàn (CĐ)', 'Đào tạo (PĐT)']
+            },
+            'thue_khau_hao': {
+                title: 'Thuê nhà & Khấu hao',
+                items: ['Thuê nhà', 'Máy móc thiết bị', 'Phân bổ CCDC', 'Trích quỹ', 'Thuế', 'Thuế (HC THUẾ)']
+            },
+            'san_tmdt': {
+                title: 'Sàn TMĐT',
+                items: ['Phí sàn Shopee (PSS)', 'Phí sàn TikTok (PSTIKTOK)', 'Phí nội sàn (TUKHOA)', 'Phí mua gói quảng cáo sàn Shopee']
+            },
+            'quang_cao_marketing': {
+                title: 'Quảng cáo & Marketing',
+                items: ['Ads Facebook', 'Ads Instagram', 'Ads TikTok', 'Video TikTok', 'Truyền thông', 'KOLs', 'Sự kiện', 'Page', 'Seeding']
+            },
+            'van_chuyen': {
+                title: 'Vận chuyển',
+                items: ['Ship Chemi', 'Ship GHTK', 'Ship AHA', 'Ship hoàn']
+            },
+            'dien_nuoc_dich_vu': {
+                title: 'Điện nước & Dịch vụ',
+                items: ['Điện nước', 'Internet (FPT)', 'Bảo vệ', 'POS', 'Tổng đài', 'Chuyển khoản', 'Phí chuyển khoản', 'Bảo Kim', 'VNPay']
+            },
+            'chi_phi_van_hanh': {
+                title: 'Chi phí vận hành',
+                items: ['Chi phí cửa hàng', 'In ấn', 'In ấn (MKT)', 'Văn phòng phẩm', 'Công tác', 'Bảo trì', 'Sản phẩm lỗi', 'Bao bì', 'Tư vấn']
+            },
+            'khac': {
+                title: 'Khác',
+                items: ['CP khác', 'Hành chính', 'Phí quản lý', 'Sang nhượng', 'Cắt kính', 'Thẻ điện thoại', 'Website', 'Tin nhắn', 'Phần mềm']
+            }
+        };
+
+        function getExpenseReason(expKey, m1, m2, m1Val, m2Val) {
+            var netRevM1 = data.summary.netRevenue[m1];
+            var netRevM2 = data.summary.netRevenue[m2];
+            var monthName1 = data.months[m1];
+            var monthName2 = data.months[m2];
+
+            // Tỷ lệ chi phí / doanh thu thuần
+            var ratioM1 = netRevM1 ? (m1Val / netRevM1 * 100).toFixed(1) : 0;
+            var ratioM2 = netRevM2 ? (m2Val / netRevM2 * 100).toFixed(1) : 0;
+            var ratioChange = (parseFloat(ratioM2) - parseFloat(ratioM1)).toFixed(1);
+            var ratioSign = parseFloat(ratioChange) >= 0 ? '▲' : '▼';
+
+            // Chênh lệch: áp dụng tỷ lệ tháng 1 sang doanh thu tháng 2
+            var expectedM2 = netRevM2 ? (netRevM2 * m1Val / netRevM1) : 0;
+            var diff = m2Val - expectedM2;
+            var diffAbs = Math.abs(diff);
+            var diffSign = diff >= 0 ? '▲' : '▼';
+
+            // Lấy chi tiết từng khoản mục
+            var detailM1 = expenseDetailSummary[expKey][monthName1.replace('Tháng ', '')] || {};
+            var detailM2 = expenseDetailSummary[expKey][monthName2.replace('Tháng ', '')] || {};
+
+            // So sánh chi tiết
+            var allCodes = new Set([...Object.keys(detailM1), ...Object.keys(detailM2)]);
+            var changes = [];
+
+            allCodes.forEach(function(code) {
+                var valM1 = detailM1[code] ? detailM1[code].total : 0;
+                var valM2 = detailM2[code] ? detailM2[code].total : 0;
+                var itemName = detailM2[code] ? detailM2[code].name : (detailM1[code] ? detailM1[code].name : code);
+
+                if (valM1 === 0 && valM2 > 0) {
+                    // Khoản mục mới có trong tháng 2 mà không có trong tháng 1
+                    changes.push({ name: itemName, diff: valM2, type: 'new', code: code });
+                } else if (valM1 > 0 && valM2 === 0) {
+                    // Khoản mục có trong tháng 1 nhưng không có trong tháng 2
+                    changes.push({ name: itemName, diff: -valM1, type: 'removed', code: code });
+                } else if (valM1 !== valM2) {
+                    var itemDiff = valM2 - valM1;
+                    changes.push({ name: itemName, diff: itemDiff, type: itemDiff > 0 ? 'up' : 'down', code: code });
+                }
+            });
+
+            // Sắp xếp theo mức độ thay đổi (lớn nhất trước)
+            changes.sort(function(a, b) { return Math.abs(b.diff) - Math.abs(a.diff); });
+
+            // Tạo HTML chi tiết
+            var detailHtml = '';
+            if (changes.length > 0) {
+                var topChanges = changes.slice(0, 5); // Chỉ hiển thị 5 thay đổi lớn nhất
+                detailHtml = topChanges.map(function(c) {
+                    var sign = c.diff >= 0 ? '▲' : '▼';
+                    var label = '';
+                    if (c.type === 'new') label = 'mới: +' + fmt(c.diff);
+                    else if (c.type === 'removed') label = 'bớt: ' + fmt(Math.abs(c.diff));
+                    else label = sign + ' ' + fmt(Math.abs(c.diff));
+                    return c.name + ' (' + label + ')';
+                }).join('; ');
+                if (changes.length > 5) {
+                    detailHtml += '... (+' + (changes.length - 5) + ' khoản khác)';
+                }
+            }
+
+            return '<div class="exp-reason">' +
+                '<div><strong>So sánh:</strong> ' + monthName1 + ' với ' + monthName2 + '</div>' +
+                '<div><strong>Tỷ lệ/DT thuần:</strong> ' + ratioM1 + '% → ' + ratioM2 + '% (' + ratioSign + ' ' + Math.abs(ratioChange) + '%)</div>' +
+                '<div><strong>Chênh lệch:</strong> ' + diffSign + ' ' + fmt(Math.round(diffAbs)) + '</div>' +
+                (detailHtml ? '<div class="exp-detail"><strong>Chi tiết:</strong> ' + detailHtml + '</div>' : '') +
+                '</div>';
+        }
+
+        function openExpenseDetail(expKey) {
+            // Open expense detail page filtered by category
+            var detailUrl = 'expense_detail.html?category=' + expKey + '&t=' + Date.now();
+            document.getElementById('modal-expense-title').textContent = 'Chi tiết Chi phí: ' + expenseCategoryDetails[expKey].title;
+            document.getElementById('iframe-expense').src = detailUrl;
+            openModal('modal-expense');
+        }
+
+        function getChannelReason(ch, m1Val, m2Val) {
+            var diff = m2Val - m1Val;
+            var pct = m1Val ? (diff / m1Val * 100).toFixed(1) : 0;
+            var reasons = {
+                north: { up: 'Miền Bắc tăng trưởng tốt - do mở rộng cửa hàng hoặc hoạt động hiệu quả', down: 'Miền Bắc giảm - cần xem lại chiến lược kinh doanh khu vực' },
+                south: { up: 'Miền Nam tăng trưởng - thị trường miền Nam hoạt động tốt', down: 'Miền Nam giảm - cần kiểm tra các cửa hàng yếu kém' },
+                central: { up: 'Miền Trung tăng trưởng - tiềm năng phát triển', down: 'Miền Trung giảm - thị trường chưa ổn định' },
+                tmdt: { up: 'TMĐT tăng - xu hướng mua sắm online tăng', down: 'TMĐT giảm - cạnh tranh khốc liệt trên sàn' },
+                online: { up: 'Kênh Online tăng - seeding marketing hiệu quả', down: 'Kênh Online giảm - cần đẩy mạnh marketing' }
+            };
+            var dir = diff >= 0 ? 'up' : 'down';
+            return reasons[ch][dir] + ' (' + getSign(diff) + Math.abs(pct) + '%)';
+        }
+
+        var channelOrder = ['north', 'south', 'central', 'tmdt', 'online'];
+
+        function buildTrendChart(containerId, values, labels) {
+            var maxVal = Math.max(...values);
+            var minVal = Math.min(...values, 0);
+            var range = maxVal - minVal;
+            if (range === 0) range = 1;
+
+            var html = '';
+            for (var i = 0; i < values.length; i++) {
+                var barHeight = range > 0 ? Math.max(20, (values[i] / maxVal) * 160) : 20;
+                var barClass = values[i] >= 0 ? 'positive' : 'negative';
+                var changeHtml = '';
+                if (i > 0) {
+                    var change = values[i] - values[i-1];
+                    var changeClass = change >= 0 ? 'up' : 'down';
+                    var changeSign = change >= 0 ? '▲' : '▼';
+                    changeHtml = '<div class="trend-change ' + changeClass + '">' + changeSign + ' ' + fmt(Math.abs(change)) + '</div>';
+                }
+                html += '<div class="trend-bar-wrapper">' +
+                    '<div class="trend-bar-value">' + fmt(values[i]) + '</div>' +
+                    '<div class="trend-bar ' + barClass + '" style="height: ' + barHeight + 'px;"></div>' +
+                    changeHtml +
+                    '<div class="trend-bar-label">' + labels[i] + '</div>' +
+                    '</div>';
+            }
+            document.getElementById(containerId).innerHTML = html;
+        }
+
+        function updateTrendCharts() {
+            var labels = data.months;
+            var revValues = data.summary.netRevenue;
+            var profitValues = data.summary.netProfit;
+
+            buildTrendChart('trend-revenue', revValues, labels);
+            buildTrendChart('trend-net-profit', profitValues, labels);
+        }
+
+        function updateDashboard() {
+            var m1 = parseInt(document.getElementById('month1').value);
+            var m2 = parseInt(document.getElementById('month2').value);
+
+            // Update month headers
+            document.getElementById('th-month1').textContent = data.months[m1];
+            document.getElementById('th-month2').textContent = data.months[m2];
+            document.getElementById('th-exp-month1').textContent = data.months[m1];
+            document.getElementById('th-exp-month2').textContent = data.months[m2];
+
+            var s = data.summary;
+
+            // KPIs - Doanh Thu Tháng = Doanh thu thuần
+            document.getElementById('kpi-revenue').textContent = fmt(s.netRevenue[m2]);
+            var revDiff = s.netRevenue[m2] - s.netRevenue[m1];
+            document.getElementById('kpi-revenue-diff').innerHTML = '<span class="' + getDiffClass(revDiff) + '">' + getSign(revDiff) + ' ' + fmtDiff(revDiff) + ' so với ' + data.months[m1] + '</span>';
+
+            // Excel files with sheet names
+            var excelFiles = [
+                '../THÁNG 01.26 BÁO CÁO THÁNG 01.xlsx',
+                '../THÁNG 02.26 BÁO CÁO THÁNG 02 .xlsx',
+                '../THÁNG 03.26 BÁO CÁO THÁNG 03.xlsx'
+            ];
+            var sheetRevenue = 'Báo cáo cửa hàng';
+            var sheetProfit = 'BCKQHĐKD';
+            var sheetExpense = 'Chi tiết chi phí';
+
+            // Set links with sheet names
+            document.getElementById('kpi-revenue-link').href = excelFiles[m2] + '#' + sheetRevenue;
+            document.getElementById('kpi-profit-link').href = excelFiles[m2] + '#' + sheetProfit;
+            document.getElementById('kpi-expense-link').href = excelFiles[m2] + '#' + sheetExpense;
+
+            var profit = s.netProfit[m2];
+            document.getElementById('kpi-profit').textContent = fmt(profit);
+            document.getElementById('kpi-profit').className = 'kpi-value ' + (profit >= 0 ? 'positive' : 'negative');
+            var profitDiff = s.netProfit[m2] - s.netProfit[m1];
+            document.getElementById('kpi-profit-diff').innerHTML = '<span class="' + getDiffClass(profitDiff) + '">' + getSign(profitDiff) + ' ' + fmtDiff(profitDiff) + ' so với ' + data.months[m1] + '</span>';
+
+            var margin = (s.netProfit[m2] / s.netRevenue[m2] * 100);
+            document.getElementById('kpi-margin').textContent = margin.toFixed(1) + '%';
+            var margin1 = (s.netProfit[m1] / s.netRevenue[m1] * 100);
+            var marginDiff = margin - margin1;
+            document.getElementById('kpi-margin-diff').innerHTML = '<span class="' + getDiffClass(marginDiff) + '">' + getSign(marginDiff) + ' ' + Math.abs(marginDiff).toFixed(1) + '% so với ' + data.months[m1] + '</span>';
+
+            var totalExp2 = s.sellingExpense[m2] + s.managementExpense[m2];
+            var totalExp1 = s.sellingExpense[m1] + s.managementExpense[m1];
+            document.getElementById('kpi-expense').textContent = fmt(totalExp2);
+            var expDiff = totalExp2 - totalExp1;
+            // Expense: increase (diff > 0) = bad (red ▲), decrease (diff <= 0) = good (green ▼)
+            var expKpiClass = expDiff > 0 ? 'diff-up' : 'diff-down';
+            var expKpiSign = expDiff > 0 ? '▲' : '▼';
+            document.getElementById('kpi-expense-diff').innerHTML = '<span class="' + expKpiClass + '">' + expKpiSign + ' ' + fmtDiff(expDiff) + ' so với ' + data.months[m1] + '</span>';
+
+            // Summary Table
+            var netMargin1 = s.netRevenue[m1] ? (s.netProfit[m1] / s.netRevenue[m1] * 100).toFixed(1) : '0.0';
+            var netMargin2 = s.netRevenue[m2] ? (s.netProfit[m2] / s.netRevenue[m2] * 100).toFixed(1) : '0.0';
+            var netMarginDiff = (parseFloat(netMargin2) - parseFloat(netMargin1)).toFixed(1);
+
+            var cogsRatio1 = s.netRevenue[m1] ? (s.cogs[m1] / s.netRevenue[m1] * 100).toFixed(1) : '0.0';
+            var cogsRatio2 = s.netRevenue[m2] ? (s.cogs[m2] / s.netRevenue[m2] * 100).toFixed(1) : '0.0';
+            var cogsRatioDiff = (parseFloat(cogsRatio2) - parseFloat(cogsRatio1)).toFixed(1);
+
+            var expRatio1 = s.netRevenue[m1] ? (totalExp1 / s.netRevenue[m1] * 100).toFixed(1) : '0.0';
+            var expRatio2 = s.netRevenue[m2] ? (totalExp2 / s.netRevenue[m2] * 100).toFixed(1) : '0.0';
+            var expRatioDiff = (parseFloat(expRatio2) - parseFloat(expRatio1)).toFixed(1);
+
+            // Tỷ lệ chiết khấu = Chiết khấu / Doanh số * 100
+            var discountRatio1 = s.revenue[m1] ? (s.revenueDiscount[m1] / s.revenue[m1] * 100).toFixed(1) : '0.0';
+            var discountRatio2 = s.revenue[m2] ? (s.revenueDiscount[m2] / s.revenue[m2] * 100).toFixed(1) : '0.0';
+            var discountRatioDiff = (parseFloat(discountRatio2) - parseFloat(discountRatio1)).toFixed(1);
+
+            // Doanh số chi tiết theo kênh
+            var channelOrder = ['north', 'south', 'central', 'tmdt', 'online'];
+            var channelTitles = {north: 'Miền Bắc', south: 'Miền Nam', central: 'Miền Trung', tmdt: 'TMĐT', online: 'Online'};
+            // Lợi nhuận thuần tối thiểu (phải TRÊN mới đạt)
+            var channelNetMarginMin = {north: 13, south: 9, central: 10, tmdt: 18, online: 15};
+            // Tỷ lệ chiết khấu tối đa (phải DƯỚI mới đạt)
+            var channelDiscountMax = {north: 15, south: 15, central: 15, tmdt: 20, online: 15};
+            // Tỷ lệ GV/DT thuần tối đa (phải DƯỚI mới đạt)
+            var channelCogsMax = {north: 36, south: 36, central: 36, tmdt: 45, online: 36};
+            // Tỷ lệ CP/DT thuần tối đa (phải DƯỚI mới đạt)
+            var channelExpenseMax = {north: 36, south: 36, central: 36, tmdt: 45, online: 36};
+            // Tỷ lệ CP/DT thuần tối đa - giới hạn riêng (phải DƯỚI mới đạt)
+            var channelExpenseMax2 = {north: 51, south: 55, central: 54, tmdt: 35, online: 49};
+            var monthName1 = data.months[m1];
+            var monthName2 = data.months[m2];
+
+            // Revenue diff
+            var revenueDiff = s.revenue[m2] - s.revenue[m1];
+            var revenuePct = s.revenue[m1] ? (revenueDiff / s.revenue[m1] * 100).toFixed(1) : '0.0';
+
+            // Net profit diff
+            var netProfitDiff = s.netProfit[m2] - s.netProfit[m1];
+            var netProfitPct = s.netProfit[m1] ? (netProfitDiff / s.netProfit[m1] * 100).toFixed(1) : '0.0';
+            var netMargin1 = s.netRevenue[m1] ? (s.netProfit[m1] / s.netRevenue[m1] * 100).toFixed(1) : '0.0';
+            var netMargin2 = s.netRevenue[m2] ? (s.netProfit[m2] / s.netRevenue[m2] * 100).toFixed(1) : '0.0';
+            var netMarginEff = netMargin2 > netMargin1 ? 'Hiệu quả' : 'Chưa hiệu quả';
+
+            // Discount
+            var discountDiff = s.revenueDiscount[m2] - s.revenueDiscount[m1];
+            var discountPct = s.revenueDiscount[m1] ? (discountDiff / s.revenueDiscount[m1] * 100).toFixed(1) : '0.0';
+            var discountRatioChange = (parseFloat(discountRatio2) - parseFloat(discountRatio1)).toFixed(1);
+            var discountEff = discountRatioChange <= 0 ? 'Hiệu quả' : 'Chưa hiệu quả';
+
+            // DT thuan
+            var netRevDiff = s.netRevenue[m2] - s.netRevenue[m1];
+            var netRevPct = s.netRevenue[m1] ? (netRevDiff / s.netRevenue[m1] * 100).toFixed(1) : '0.0';
+
+            // COGS
+            var cogsDiff = s.cogs[m2] - s.cogs[m1];
+            var cogsPct = s.cogs[m1] ? (cogsDiff / s.cogs[m1] * 100).toFixed(1) : '0.0';
+            var cogsRatioChange = (parseFloat(cogsRatio2) - parseFloat(cogsRatio1)).toFixed(1);
+            var cogsEff = cogsRatioChange <= 0 ? 'Hiệu quả' : 'Chưa hiệu quả';
+
+            // Gross profit
+            var gpDiff = s.grossProfit[m2] - s.grossProfit[m1];
+            var gpPct = s.grossProfit[m1] ? (gpDiff / s.grossProfit[m1] * 100).toFixed(1) : '0.0';
+            var revDriver = s.revenue[m2] - s.revenue[m1];
+            var discDriver = -(s.revenueDiscount[m2] - s.revenueDiscount[m1]);
+            var cogsDriver = -(s.cogs[m2] - s.cogs[m1]);
+            var gpDrivers = [];
+            if (revDriver > 0) gpDrivers.push('DS +' + fmt(revDriver));
+            else if (revDriver < 0) gpDrivers.push('DS ' + fmt(revDriver));
+            if (discDriver > 0) gpDrivers.push('CK -' + fmt(discDriver));
+            else if (discDriver < 0) gpDrivers.push('CK +' + fmt(Math.abs(discDriver)));
+            if (cogsDriver > 0) gpDrivers.push('GV -' + fmt(cogsDriver));
+            else if (cogsDriver < 0) gpDrivers.push('GV +' + fmt(Math.abs(cogsDriver)));
+
+            // Helper: sum of channel diffs
+            function sumChannelDiff(key) {
+                return channelOrder.reduce(function(sum, ch) {
+                    var chM1 = data.channels[ch][key][m1] || 0;
+                    var chM2 = data.channels[ch][key][m2] || 0;
+                    return sum + (chM2 - chM1);
+                }, 0);
+            }
+
+            // Build netMargin per channel HTML - LN thuan / DT thuan
+            // Lợi nhuận thuần: phải TRÊN hạn mức mới là hiệu quả
+            function buildNetMarginChannelHtml() {
+                var totalDiff = s.netProfit[m2] - s.netProfit[m1];
+                var rows = channelOrder.map(function(ch) {
+                    var nm1 = data.channels[ch].netMargin[m1] || 0;
+                    var nm2 = data.channels[ch].netMargin[m2] || 0;
+                    var np1 = data.channels[ch].netProfit[m1] || 0;
+                    var np2 = data.channels[ch].netProfit[m2] || 0;
+                    var nmDiff = nm2 - nm1;
+                    var npDiff = np2 - np1;
+                    var nmSign = nmDiff >= 0 ? '▲' : '▼';
+                    var npSign = npDiff >= 0 ? '+' : '-';
+                    var limit = channelNetMarginMin[ch];
+                    var datXuong = nm2 >= limit; // TRUE = đạt (trên limit), FALSE = không đạt (dưới limit)
+                    var effText = datXuong ? 'Hiệu quả' : 'Không hiệu quả';
+                    return '<div>' + channelTitles[ch] + ': <strong>' + nm2.toFixed(1) + '%</strong> (' + nmSign + ' ' + Math.abs(nmDiff).toFixed(1) + '%) | LN: ' + npSign + fmt(Math.abs(npDiff)) + ' đ | <span class="' + (datXuong ? 'text-green' : 'text-red') + '">' + effText + (datXuong ? '' : ' [DƯỚI ' + limit + '%]') + '</span></div>' +
+                           '<div class="ch-formula">LN: ' + fmt(np2) + ' | DT thuần: ' + fmt(data.channels[ch].netRevenue[m2]) + ' | Tỷ lệ: ' + nm2.toFixed(1) + '% | Tối thiểu: ' + limit + '%</div>';
+                }).join('');
+                // Find best and worst
+                var bestCh = null, worstCh = null, bestNm = -999, worstNm = 999;
+                channelOrder.forEach(function(ch) {
+                    if (data.channels[ch].netMargin[m2] > bestNm) { bestNm = data.channels[ch].netMargin[m2]; bestCh = ch; }
+                    if (data.channels[ch].netMargin[m2] < worstNm) { worstNm = data.channels[ch].netMargin[m2]; worstCh = ch; }
+                });
+                // Check if overall is effective
+                var allDat = channelOrder.every(function(ch) { return data.channels[ch].netMargin[m2] >= channelNetMarginMin[ch]; });
+                var overallEff = allDat ? '<span class="text-green">Hiệu quả</span>' : '<span class="text-red">Không hiệu quả</span>';
+                return '<div class="ch-note"><strong>Tổng hợp: ' + overallEff + '</strong> - Chủ yếu đến từ <strong>' + channelTitles[bestCh] + '</strong> (' + bestNm.toFixed(1) + '%). ' + channelTitles[worstCh] + ' thấp nhất (' + worstNm.toFixed(1) + '%)</div>' + rows;
+            }
+
+            // Build expense ratio per channel HTML - CP / DT thuần (giới hạn 36%/45%)
+            // CP/DT thuần: phải DƯỚI hạn mức mới là hiệu quả
+            function buildExpenseRatioChannelHtml() {
+                var rows = channelOrder.map(function(ch) {
+                    var er1 = data.channels[ch].expenseRatio[m1] || 0;
+                    var er2 = data.channels[ch].expenseRatio[m2] || 0;
+                    var erDiff = er2 - er1;
+                    var sign = erDiff <= 0 ? '▼' : '▲';
+                    var limit = channelExpenseMax[ch];
+                    var datXuong = er2 <= limit; // TRUE = đạt (dưới limit), FALSE = không đạt (vượt limit)
+                    var effText = datXuong ? 'Hiệu quả' : 'Không hiệu quả';
+                    return '<div>' + channelTitles[ch] + ': <strong>' + er2.toFixed(1) + '%</strong> (' + sign + ' ' + Math.abs(erDiff).toFixed(1) + '%) | <span class="' + (datXuong ? 'text-green' : 'text-red') + '">' + effText + (datXuong ? '' : ' [VƯỢT ' + limit + '%]') + '</span></div>' +
+                           '<div class="ch-formula">Tổng CP: ' + fmt(data.channels[ch].totalExpense[m2]) + ' | DT thuần: ' + fmt(data.channels[ch].netRevenue[m2]) + ' | Tối đa: ' + limit + '%</div>';
+                }).join('');
+                var allDat = channelOrder.every(function(ch) { return data.channels[ch].expenseRatio[m2] <= channelExpenseMax[ch]; });
+                var overallEff = allDat ? '<span class="text-green">Hiệu quả</span>' : '<span class="text-red">Không hiệu quả</span>';
+                return '<div class="ch-note"><strong>Tổng hợp: ' + overallEff + '</strong></div>' + rows;
+            }
+
+            // Build COGS ratio per channel HTML - GV / DT thuần
+            // GV/DT thuần: phải DƯỚI hạn mức mới là hiệu quả
+            function buildCogsRatioChannelHtml() {
+                var rows = channelOrder.map(function(ch) {
+                    var gm1 = data.channels[ch].grossMargin[m1] || 0;
+                    var gm2 = data.channels[ch].grossMargin[m2] || 0;
+                    // cogs/netRevenue = 100 - grossMargin
+                    var cr1 = 100 - gm1;
+                    var cr2 = 100 - gm2;
+                    var crDiff = cr2 - cr1;
+                    var sign = crDiff <= 0 ? '▼' : '▲';
+                    var limit = channelCogsMax[ch];
+                    var datXuong = cr2 <= limit; // TRUE = đạt (dưới limit), FALSE = không đạt (vượt limit)
+                    var effText = datXuong ? 'Hiệu quả' : 'Không hiệu quả';
+                    return '<div>' + channelTitles[ch] + ': <strong>' + cr2.toFixed(1) + '%</strong> (' + sign + ' ' + Math.abs(crDiff).toFixed(1) + '%) | <span class="' + (datXuong ? 'text-green' : 'text-red') + '">' + effText + (datXuong ? '' : ' [VƯỢT ' + limit + '%]') + '</span></div>' +
+                           '<div class="ch-formula">GV: ' + fmt(data.channels[ch].cogs[m2]) + ' | DT thuần: ' + fmt(data.channels[ch].netRevenue[m2]) + ' | Tối đa: ' + limit + '%</div>';
+                }).join('');
+                var allDat = channelOrder.every(function(ch) { return (100 - data.channels[ch].grossMargin[m2]) <= channelCogsMax[ch]; });
+                var overallEff = allDat ? '<span class="text-green">Hiệu quả</span>' : '<span class="text-red">Không hiệu quả</span>';
+                return '<div class="ch-note"><strong>Tổng hợp: ' + overallEff + '</strong></div>' + rows;
+            }
+
+            // Build discount ratio per channel - note: no per-channel data available
+            // Chiết khấu: phải DƯỚI hạn mức mới là hiệu quả
+            function buildDiscountRatioChannelHtml() {
+                // Overall discount ratio check
+                var discountLimitOverall = 15; // general limit
+                var datXuong = parseFloat(discountRatio2) <= discountLimitOverall;
+                var effText = datXuong ? 'Hiệu quả' : 'Không hiệu quả';
+                return '<div class="ch-note"><strong>Tổng: ' + discountRatio2 + '%</strong> | Tổng CK: ' + fmt(s.revenueDiscount[m2]) + ' | <span class="' + (datXuong ? 'text-green' : 'text-red') + '">' + effText + (datXuong ? '' : ' [VƯỢT ' + discountLimitOverall + '%]') + '</span></div>' +
+                       '<div class="ch-note">*Không có dữ liệu chiết khấu chi tiết theo kênh. Giới hạn: Miền Bắc/Nam/Trung/Online &lt;15%, TMĐT &lt;20%</div>';
+            }
+
+            // Build expense ratio per channel HTML v2 - CP / DT thuần (giới hạn riêng: 51%/55%/54%/35%/49%)
+            // Phải DƯỚI hạn mức mới là hiệu quả
+            function buildExpenseRatioChannelHtml2() {
+                var rows = channelOrder.map(function(ch) {
+                    var er1 = data.channels[ch].expenseRatio[m1] || 0;
+                    var er2 = data.channels[ch].expenseRatio[m2] || 0;
+                    var erDiff = er2 - er1;
+                    var sign = erDiff <= 0 ? '▼' : '▲';
+                    var limit = channelExpenseMax2[ch];
+                    var datXuong = er2 <= limit; // TRUE = đạt (dưới limit), FALSE = không đạt (vượt limit)
+                    var effText = datXuong ? 'Hiệu quả' : 'Không hiệu quả';
+                    return '<div>' + channelTitles[ch] + ': <strong>' + er2.toFixed(1) + '%</strong> (' + sign + ' ' + Math.abs(erDiff).toFixed(1) + '%) | <span class="' + (datXuong ? 'text-green' : 'text-red') + '">' + effText + (datXuong ? '' : ' [VƯỢT ' + limit + '%]') + '</span></div>' +
+                           '<div class="ch-formula">Tổng CP: ' + fmt(data.channels[ch].totalExpense[m2]) + ' | DT thuần: ' + fmt(data.channels[ch].netRevenue[m2]) + ' | Tối đa: ' + limit + '%</div>';
+                }).join('');
+                var allDat = channelOrder.every(function(ch) { return data.channels[ch].expenseRatio[m2] <= channelExpenseMax2[ch]; });
+                var overallEff = allDat ? '<span class="text-green">Hiệu quả</span>' : '<span class="text-red">Không hiệu quả</span>';
+                return '<div class="ch-note"><strong>Tổng hợp: ' + overallEff + '</strong></div>' + rows;
+            }
+
+            // Build Doanh so channel HTML
+            function buildDoanhSoChannelHtml() {
+                var totalDiff = s.revenue[m2] - s.revenue[m1];
+                return channelOrder.map(function(ch) {
+                    var chM1 = data.channels[ch].revenue[m1] || 0;
+                    var chM2 = data.channels[ch].revenue[m2] || 0;
+                    var chDiff = chM2 - chM1;
+                    var chPct = totalDiff ? (chDiff / totalDiff * 100).toFixed(1) : '0.0';
+                    var chSign = chDiff >= 0 ? '▲' : '▼';
+                    var signStr = chDiff >= 0 ? '+' : '-';
+                    return '<div>' + channelTitles[ch] + ': ' + chSign + ' ' + signStr + fmt(Math.abs(chDiff)) + ' đ (' + Math.abs(chPct) + '%)</div>' +
+                           '<div class="ch-formula">' + fmt(chM2) + ' - ' + fmt(chM1) + ' = ' + fmt(chDiff) + ' <a onclick="openDetail(\'revenue\', \'' + ch + '\')" class="mini-link">[chi tiết]</a></div>';
+                }).join('') + '<div class="ch-note">*Tổng: ' + fmt(s.revenue[m2]) + ' - ' + fmt(s.revenue[m1]) + ' = ' + fmt(revenueDiff) + '</div>';
+            }
+
+            // Build DT thuan channel HTML
+            function buildDtThuongChannelHtml() {
+                var totalDiff = s.netRevenue[m2] - s.netRevenue[m1];
+                return channelOrder.map(function(ch) {
+                    var chM1 = data.channels[ch].netRevenue[m1] || 0;
+                    var chM2 = data.channels[ch].netRevenue[m2] || 0;
+                    var chDiff = chM2 - chM1;
+                    var chPct = totalDiff ? (chDiff / totalDiff * 100).toFixed(1) : '0.0';
+                    var chSign = chDiff >= 0 ? '▲' : '▼';
+                    var signStr = chDiff >= 0 ? '+' : '-';
+                    return '<div>' + channelTitles[ch] + ': ' + chSign + ' ' + signStr + fmt(Math.abs(chDiff)) + ' đ (' + Math.abs(chPct) + '%)</div>' +
+                           '<div class="ch-formula">' + fmt(chM2) + ' - ' + fmt(chM1) + ' = ' + fmt(chDiff) + ' <a onclick="openDetail(\'revenue\', \'' + ch + '\')" class="mini-link">[chi tiết]</a></div>';
+                }).join('') + '<div class="ch-note">*Tổng: ' + fmt(s.netRevenue[m2]) + ' - ' + fmt(s.netRevenue[m1]) + ' = ' + fmt(netRevDiff) + '</div>';
+            }
+
+            // Build COGS channel HTML
+            function buildCogsChannelHtml() {
+                var totalDiff = s.cogs[m2] - s.cogs[m1];
+                return channelOrder.map(function(ch) {
+                    var chM1 = data.channels[ch].cogs[m1] || 0;
+                    var chM2 = data.channels[ch].cogs[m2] || 0;
+                    var chDiff = chM2 - chM1;
+                    var chPct = totalDiff ? (chDiff / totalDiff * 100).toFixed(1) : '0.0';
+                    var chSign = chDiff >= 0 ? '▲' : '▼';
+                    var signStr = chDiff >= 0 ? '+' : '-';
+                    return '<div>' + channelTitles[ch] + ': ' + chSign + ' ' + signStr + fmt(Math.abs(chDiff)) + ' đ (' + Math.abs(chPct) + '%)</div>' +
+                           '<div class="ch-formula">' + fmt(chM2) + ' - ' + fmt(chM1) + ' = ' + fmt(chDiff) + ' <a onclick="openDetail(\'profit\', \'' + ch + '\')" class="mini-link">[chi tiết]</a></div>';
+                }).join('') + '<div class="ch-note">*Tổng: ' + fmt(s.cogs[m2]) + ' - ' + fmt(s.cogs[m1]) + ' = ' + fmt(cogsDiff) + '</div>';
+            }
+
+            // Build GP channel HTML
+            function buildGpChannelHtml() {
+                var totalDiff = s.grossProfit[m2] - s.grossProfit[m1];
+                return channelOrder.map(function(ch) {
+                    var chM1 = data.channels[ch].grossProfit[m1] || 0;
+                    var chM2 = data.channels[ch].grossProfit[m2] || 0;
+                    var chDiff = chM2 - chM1;
+                    var chPct = totalDiff ? (chDiff / totalDiff * 100).toFixed(1) : '0.0';
+                    var chSign = chDiff >= 0 ? '▲' : '▼';
+                    var signStr = chDiff >= 0 ? '+' : '-';
+                    return '<div>' + channelTitles[ch] + ': ' + chSign + ' ' + signStr + fmt(Math.abs(chDiff)) + ' đ (' + Math.abs(chPct) + '%)</div>' +
+                           '<div class="ch-formula">' + fmt(chM2) + ' - ' + fmt(chM1) + ' = ' + fmt(chDiff) + ' <a onclick="openDetail(\'profit\', \'' + ch + '\')" class="mini-link">[chi tiết]</a></div>';
+                }).join('') + '<div class="ch-note">*Tổng: ' + fmt(s.grossProfit[m2]) + ' - ' + fmt(s.grossProfit[m1]) + ' = ' + fmt(gpDiff) + ' | Thay đổi: ' + gpDrivers.join(', ') + '</div>';
+            }
+
+            // Helper to build HTML reason with links and line breaks
+            function buildReasonHtml(sections) {
+                return '<div class="reason">' + sections.map(function(sec) {
+                    if (sec.type === 'channel') {
+                        return '<div class="section ch-breakdown">' + sec.html + '</div>';
+                    } else if (sec.type === 'text') {
+                        return '<div class="section">' + sec.value + '</div>';
+                    }
+                }).join('') + '</div>';
+            }
+
+            var summaryData = [
+                {
+                    label: 'Doanh số', m1: s.revenue[m1], m2: s.revenue[m2],
+                    reasonHtml: buildReasonHtml([
+                        { type: 'text', value: monthName2 + ' so với ' + monthName1 + ': ' + (revenueDiff >= 0 ? 'tăng' : 'giảm') + ' ' + Math.abs(revenuePct) + '% (' + fmt(s.revenue[m2]) + ' - ' + fmt(s.revenue[m1]) + ' = ' + fmt(revenueDiff) + ')' },
+                        { type: 'channel', html: buildDoanhSoChannelHtml() }
+                    ]),
+                    isPercent: false, isExpense: false
+                },
+                {
+                    label: 'Chiết khấu', m1: s.revenueDiscount[m1], m2: s.revenueDiscount[m2],
+                    reasonHtml: buildReasonHtml([
+                        { type: 'text', value: monthName2 + ' so với ' + monthName1 + ': ' + (discountDiff <= 0 ? 'giảm' : 'tăng') + ' ' + Math.abs(discountPct) + '%' },
+                        { type: 'text', value: 'Tỷ lệ CK: ' + discountRatio1 + '% → ' + discountRatio2 + '% (' + (discountRatioChange >= 0 ? '▲' : '▼') + Math.abs(discountRatioChange) + '%) - ' + discountEff },
+                        { type: 'channel', html: buildDiscountRatioChannelHtml() }
+                    ]),
+                    isPercent: false, isExpense: false
+                },
+                {
+                    label: 'Doanh thu thuần', m1: s.netRevenue[m1], m2: s.netRevenue[m2],
+                    reasonHtml: buildReasonHtml([
+                        { type: 'text', value: monthName2 + ' so với ' + monthName1 + ': ' + (netRevDiff >= 0 ? 'tăng' : 'giảm') + ' ' + Math.abs(netRevPct) + '% (' + fmt(s.netRevenue[m2]) + ' - ' + fmt(s.netRevenue[m1]) + ' = ' + fmt(netRevDiff) + ')' },
+                        { type: 'channel', html: buildDtThuongChannelHtml() }
+                    ]),
+                    isPercent: false, isExpense: false
+                },
+                {
+                    label: 'Giá vốn', m1: s.cogs[m1], m2: s.cogs[m2],
+                    reasonHtml: buildReasonHtml([
+                        { type: 'text', value: monthName2 + ' so với ' + monthName1 + ': ' + (cogsDiff >= 0 ? 'tăng' : 'giảm') + ' ' + Math.abs(cogsPct) + '%' },
+                        { type: 'text', value: 'Tỷ lệ GV/DT thuần: ' + cogsRatio1 + '% → ' + cogsRatio2 + '% (' + (cogsRatioChange >= 0 ? '▲' : '▼') + Math.abs(cogsRatioChange) + '%) - ' + cogsEff },
+                        { type: 'channel', html: buildCogsChannelHtml() }
+                    ]),
+                    isPercent: false, isExpense: false
+                },
+                {
+                    label: 'Lợi nhuận gộp', m1: s.grossProfit[m1], m2: s.grossProfit[m2],
+                    reasonHtml: buildReasonHtml([
+                        { type: 'text', value: monthName2 + ' so với ' + monthName1 + ': ' + (gpDiff >= 0 ? 'tăng' : 'giảm') + ' ' + Math.abs(gpPct) + '%' },
+                        { type: 'text', value: 'Thay đổi: ' + gpDrivers.join(', ') },
+                        { type: 'channel', html: buildGpChannelHtml() }
+                    ]),
+                    isPercent: false, isExpense: false
+                },
+                {
+                    label: 'Chi phí kinh doanh', m1: totalExp1, m2: totalExp2,
+                    reasonHtml: buildReasonHtml([
+                        { type: 'text', value: 'CP bán hàng + CP quản lý DN' },
+                        { type: 'text', value: fmt(s.sellingExpense[m2]) + ' + ' + fmt(s.managementExpense[m2]) + ' = ' + fmt(totalExp2) },
+                        { type: 'text', value: '<a onclick="openDetail(\'expense\')" class="mini-link">[Xem chi tiết Chi phí]</a>' }
+                    ]),
+                    isPercent: false, isExpense: true
+                },
+                {
+                    label: 'Lợi nhuận thuần', m1: s.netProfit[m1], m2: s.netProfit[m2],
+                    reasonHtml: buildReasonHtml([
+                        { type: 'text', value: '<strong>' + monthName2 + ' so với ' + monthName1 + ':</strong> ' + (netProfitDiff >= 0 ? 'tăng' : 'giảm') + ' <strong>' + Math.abs(netProfitPct) + '%</strong> (' + fmt(s.netProfit[m2]) + ' - ' + fmt(s.netProfit[m1]) + ' = ' + (netProfitDiff >= 0 ? '+' : '') + fmt(netProfitDiff) + ')' },
+                        { type: 'text', value: 'Tỷ lệ LN/DT thuần: ' + netMargin1 + '% → ' + netMargin2 + '% (' + (parseFloat(netMarginDiff) >= 0 ? '▲' : '▼') + Math.abs(netMarginDiff) + '%) | <strong>Hạn mức tối thiểu:</strong> Miền Bắc &gt;13%, Miền Nam &gt;9%, Miền Trung &gt;10%, TMĐT &gt;18%, Online &gt;15%' },
+                        { type: 'channel', html: buildNetMarginChannelHtml() }
+                    ]),
+                    isPercent: false, isExpense: false
+                },
+                {
+                    label: 'Tỷ lệ chiết khấu', m1: discountRatio1 + '%', m2: discountRatio2 + '%',
+                    reasonHtml: buildReasonHtml([
+                        { type: 'text', value: '<strong>' + monthName2 + ' so với ' + monthName1 + ':</strong> ' + (parseFloat(discountRatioDiff) <= 0 ? 'giảm' : 'tăng') + ' <strong>' + Math.abs(discountRatioDiff) + '%</strong> (' + discountRatio1 + '% → ' + discountRatio2 + '%)' },
+                        { type: 'text', value: 'Tỷ lệ CK/Doanh số | <strong>Hạn mức tối đa:</strong> Miền Bắc/Nam/Trung/Online &lt;15%, TMĐT &lt;20%' },
+                        { type: 'text', value: '<em>Nếu vượt hạn mức thì nhận xét là Không hiệu quả. Nếu nằm trong hạn mức cho phép thì mới là Hiệu quả.</em>' },
+                        { type: 'channel', html: buildDiscountRatioChannelHtml() }
+                    ]),
+                    isPercent: true, rawDiff: parseFloat(discountRatioDiff), isExpense: false
+                },
+                {
+                    label: 'Tỷ lệ GV/DT thuần', m1: cogsRatio1 + '%', m2: cogsRatio2 + '%',
+                    reasonHtml: buildReasonHtml([
+                        { type: 'text', value: '<strong>' + monthName2 + ' so với ' + monthName1 + ':</strong> ' + (parseFloat(cogsRatioDiff) <= 0 ? 'giảm' : 'tăng') + ' <strong>' + Math.abs(cogsRatioDiff) + '%</strong> (' + cogsRatio1 + '% → ' + cogsRatio2 + '%)' },
+                        { type: 'text', value: 'Tỷ lệ GV/DT thuần | <strong>Hạn mức tối đa:</strong> Miền Bắc/Nam/Trung/Online &lt;36%, TMĐT &lt;45%' },
+                        { type: 'text', value: '<em>Nếu vượt hạn mức thì nhận xét là Không hiệu quả. Nếu nằm trong hạn mức cho phép thì mới là Hiệu quả.</em>' },
+                        { type: 'channel', html: buildCogsRatioChannelHtml() }
+                    ]),
+                    isPercent: true, rawDiff: parseFloat(cogsRatioDiff), isExpense: false
+                },
+                {
+                    label: 'Tỷ lệ CP/DT thuần', m1: expRatio1 + '%', m2: expRatio2 + '%',
+                    reasonHtml: buildReasonHtml([
+                        { type: 'text', value: '<strong>' + monthName2 + ' so với ' + monthName1 + ':</strong> ' + (parseFloat(expRatioDiff) <= 0 ? 'giảm' : 'tăng') + ' <strong>' + Math.abs(expRatioDiff) + '%</strong> (' + expRatio1 + '% → ' + expRatio2 + '%)' },
+                        { type: 'text', value: 'Tỷ lệ CP/DT thuần | <strong>Hạn mức tối đa:</strong> Miền Bắc/Nam/Trung/Online &lt;36%, TMĐT &lt;45%' },
+                        { type: 'text', value: '<em>Nếu vượt hạn mức thì nhận xét là Không hiệu quả. Nếu nằm trong hạn mức cho phép thì mới là Hiệu quả.</em>' },
+                        { type: 'channel', html: buildExpenseRatioChannelHtml() }
+                    ]),
+                    isPercent: true, rawDiff: parseFloat(expRatioDiff), isExpense: true
+                },
+                {
+                    label: 'Tỷ lệ CP/DT thuần (2)', m1: expRatio1 + '%', m2: expRatio2 + '%',
+                    reasonHtml: buildReasonHtml([
+                        { type: 'text', value: '<strong>' + monthName2 + ' so với ' + monthName1 + ':</strong> ' + (parseFloat(expRatioDiff) <= 0 ? 'giảm' : 'tăng') + ' <strong>' + Math.abs(expRatioDiff) + '%</strong> (' + expRatio1 + '% → ' + expRatio2 + '%)' },
+                        { type: 'text', value: 'Tỷ lệ CP/DT thuần | <strong>Hạn mức tối đa:</strong> Miền Bắc &lt;51%, Miền Nam &lt;55%, Miền Trung &lt;54%, TMĐT &lt;35%, Online &lt;49%' },
+                        { type: 'text', value: '<em>Nếu vượt hạn mức thì nhận xét là Không hiệu quả. Nếu nằm trong hạn mức cho phép thì mới là Hiệu quả.</em>' },
+                        { type: 'channel', html: buildExpenseRatioChannelHtml2() }
+                    ]),
+                    isPercent: true, rawDiff: parseFloat(expRatioDiff), isExpense: true
+                },
+                {
+                    label: 'Tỷ lệ LN/DT thuần', m1: netMargin1 + '%', m2: netMargin2 + '%',
+                    reasonHtml: buildReasonHtml([
+                        { type: 'text', value: '<strong>' + monthName2 + ' so với ' + monthName1 + ':</strong> ' + (parseFloat(netMarginDiff) >= 0 ? 'tăng' : 'giảm') + ' <strong>' + Math.abs(netMarginDiff) + '%</strong> (' + netMargin1 + '% → ' + netMargin2 + '%)' },
+                        { type: 'text', value: 'Tỷ lệ LN/DT thuần | <strong>Hạn mức tối thiểu:</strong> Miền Bắc &gt;13%, Miền Nam &gt;9%, Miền Trung &gt;10%, TMĐT &gt;18%, Online &gt;15%' },
+                        { type: 'text', value: '<em>Nếu dưới hạn mức thì nhận xét là Không hiệu quả. Nếu đạt trên hạn mức cho phép thì mới là Hiệu quả.</em>' },
+                        { type: 'channel', html: buildNetMarginChannelHtml() }
+                    ]),
+                    isPercent: true, rawDiff: parseFloat(netMarginDiff), isExpense: false
+                }
+            ];
+
+            document.querySelector('#summary-table tbody').innerHTML = summaryData.map(function(row) {
+                if (row.isPercent) {
+                    var diff = row.rawDiff;
+                    // For expense ratios, increase (diff > 0) is BAD (red ▲), decrease (diff <= 0) is GOOD (green ▼)
+                    var diffClass = row.isExpense ? (diff > 0 ? 'diff-up' : 'diff-down') : getDiffClass(diff);
+                    var sign = row.isExpense ? (diff > 0 ? '▲' : '▼') : getSign(diff);
+                    return '<tr><td>' + row.label + '</td><td class="amount">' + row.m1 + '</td><td class="amount">' + row.m2 + '</td><td class="amount ' + diffClass + '">' + sign + ' ' + Math.abs(diff) + '%</td><td>' + row.reasonHtml + '</td></tr>';
+                } else {
+                    var diff = row.m2 - row.m1;
+                    // For expense items (Chi phí kinh doanh), increase is BAD (red ▲), decrease is GOOD (green ▼)
+                    var diffClass = row.isExpense ? (diff > 0 ? 'diff-up' : 'diff-down') : getDiffClass(diff);
+                    var sign = row.isExpense ? (diff > 0 ? '▲' : '▼') : getSign(diff);
+                    return '<tr><td>' + row.label + '</td><td class="amount">' + fmt(row.m1) + '</td><td class="amount">' + fmt(row.m2) + '</td><td class="amount ' + diffClass + '">' + sign + ' ' + fmtDiff(diff) + '</td><td>' + row.reasonHtml + '</td></tr>';
+                }
+            }).join('');
+
+            // Expense Table - reorganized categories
+            var expNames = [
+                'nhan_su', 'thue_khau_hao', 'san_tmdt', 'quang_cao_marketing',
+                'van_chuyen', 'dien_nuoc_dich_vu', 'chi_phi_van_hanh', 'khac'
+            ];
+            var expTitles = [
+                'Nhân sự',
+                'Thuê nhà & Khấu hao',
+                'Sàn TMĐT',
+                'Quảng cáo & Marketing',
+                'Vận chuyển',
+                'Điện nước & Dịch vụ',
+                'Chi phí vận hành',
+                'Khác'
+            ];
+
+            document.querySelector('#expense-table tbody').innerHTML = expNames.map(function(key, i) {
+                var m1Val = data.expenses[key][m1];
+                var m2Val = data.expenses[key][m2];
+                var diff = m2Val - m1Val;
+                // For expenses: increase (diff > 0) is BAD (red ▲), decrease (diff <= 0) is GOOD (green ▼)
+                var expDiffClass = diff > 0 ? 'diff-up' : 'diff-down';
+                var expSign = diff > 0 ? '▲' : '▼';
+                var expDiffFormatted = fmtDiff(diff);
+                return '<tr class="exp-row" data-category="' + key + '">' +
+                    '<td>' + expTitles[i] + '</td>' +
+                    '<td class="amount clickable" onclick="openExpenseDetail(\'' + key + '\')">' + fmt(m1Val) + '</td>' +
+                    '<td class="amount clickable" onclick="openExpenseDetail(\'' + key + '\')">' + fmt(m2Val) + '</td>' +
+                    '<td class="amount ' + expDiffClass + '">' + expSign + ' ' + expDiffFormatted + '</td>' +
+                    '<td>' + getExpenseReason(key, m1, m2, m1Val, m2Val) + '</td></tr>';
+            }).join('');
+
+            // Update Trend Charts
+            updateTrendCharts();
+        }
+
+        // Event listeners
+        document.getElementById('month1').addEventListener('change', updateDashboard);
+        document.getElementById('month2').addEventListener('change', updateDashboard);
+
+        // Modal functions
+        function openModal(modalId) { document.getElementById(modalId).classList.add('show'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('show'); }
+
+        // Open detail modal by type
+        function openDetail(type, channel) {
+            var url = '';
+            if (type === 'revenue') {
+                url = 'revenue_detail.html';
+            } else if (type === 'profit') {
+                url = 'profit_detail.html';
+            } else if (type === 'expense') {
+                url = 'expense_detail.html';
+            }
+            if (channel) {
+                url += '?channel=' + channel;
+            }
+            if (type === 'revenue') {
+                document.getElementById('iframe-revenue').src = url;
+                openModal('modal-revenue');
+            } else if (type === 'profit') {
+                document.getElementById('iframe-profit').src = url;
+                openModal('modal-profit');
+            } else if (type === 'expense') {
+                document.getElementById('iframe-expense').src = url;
+                openModal('modal-expense');
+            }
+        }
+
+        // Revenue modal - show iframe with detail page
+        document.getElementById('kpi-revenue-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('iframe-revenue').src = 'revenue_detail.html';
+            openModal('modal-revenue');
+        });
+
+        // Profit modal - show iframe with detail page
+        document.getElementById('kpi-profit-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('iframe-profit').src = 'profit_detail.html';
+            openModal('modal-profit');
+        });
+
+        // Expense modal - show iframe with detail page
+        document.getElementById('kpi-expense-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('iframe-expense').src = 'expense_detail.html';
+            openModal('modal-expense');
+        });
+
+        // Close modal when clicking outside
+        document.querySelectorAll('.modal').forEach(function(modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) { modal.classList.remove('show'); }
+            });
+        });
+
+        // Init
+        updateDashboard();
+    </script>
+
+    <!-- Revenue Modal -->
+    <div id="modal-revenue" class="modal">
+        <div class="modal-content" style="max-width:1000px">
+            <div class="modal-header">
+                <h3 id="modal-revenue-title">Chi tiết Doanh thu</h3>
+                <button class="modal-close" onclick="closeModal('modal-revenue')">Đóng</button>
+            </div>
+            <iframe id="iframe-revenue" src="" style="width:100%;height:500px;border:none;"></iframe>
+        </div>
+    </div>
+
+    <!-- Profit Modal -->
+    <div id="modal-profit" class="modal">
+        <div class="modal-content" style="max-width:1000px">
+            <div class="modal-header">
+                <h3 id="modal-profit-title">Chi tiết Lợi nhuận</h3>
+                <button class="modal-close" onclick="closeModal('modal-profit')">Đóng</button>
+            </div>
+            <iframe id="iframe-profit" src="" style="width:100%;height:500px;border:none;"></iframe>
+        </div>
+    </div>
+
+    <!-- Expense Modal -->
+    <div id="modal-expense" class="modal">
+        <div class="modal-content" style="max-width:1000px">
+            <div class="modal-header">
+                <h3 id="modal-expense-title">Chi tiết Chi phí</h3>
+                <button class="modal-close" onclick="closeModal('modal-expense')">Đóng</button>
+            </div>
+            <iframe id="iframe-expense" src="" style="width:100%;height:500px;border:none;"></iframe>
+        </div>
+    </div>
+</body>
+</html>
