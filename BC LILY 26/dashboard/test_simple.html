@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo Cáo Tài Chính - ULTD Thịnh Phát</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f7fa; padding: 20px; }
+        .header { background: linear-gradient(135deg, #1a5276, #2980b9); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .kpi-row { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+        .kpi-card { background: white; border-radius: 10px; padding: 20px; min-width: 200px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .kpi-title { font-size: 0.85rem; color: #666; text-transform: uppercase; }
+        .kpi-value { font-size: 1.8rem; font-weight: 700; color: #1a5276; margin: 10px 0; }
+        .positive { color: #27ae60; }
+        .negative { color: #e74c3c; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #1a5276; color: white; }
+        .amount { text-align: right; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Công Ty Cổ Phần ULTD Thịnh Phát</h1>
+        <p>Báo Cáo Tài Chính - Cập nhật: 2026-05-08</p>
+    </div>
+
+    <div class="kpi-row">
+        <div class="kpi-card">
+            <div class="kpi-title">Doanh Thu</div>
+            <div class="kpi-value" id="kpi-revenue">-</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Lợi Nhuận</div>
+            <div class="kpi-value" id="kpi-profit">-</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Tỷ Suất LN</div>
+            <div class="kpi-value" id="kpi-margin">-</div>
+        </div>
+    </div>
+
+    <h2>Tổng Hợp theo Tháng</h2>
+    <table id="summary-table">
+        <thead><tr><th>Chỉ tiêu</th><th>Tháng 1</th><th>Tháng 2</th><th>Tháng 3</th></tr></thead>
+        <tbody></tbody>
+    </table>
+
+    <h2>Chi Phí</h2>
+    <table id="expense-table">
+        <thead><tr><th>Loại</th><th>Tháng 1</th><th>Tháng 2</th><th>Tháng 3</th></tr></thead>
+        <tbody></tbody>
+    </table>
+
+    <h2>Theo Kênh (Tháng 3)</h2>
+    <table id="channel-table">
+        <thead><tr><th>Kênh</th><th>Doanh thu</th><th>Lợi nhuận gộp</th><th>Biên LN</th><th>Chi phí</th><th>Tỷ lệ CP/DT</th></tr></thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        // Data
+        var data = {
+            months: ["Tháng 1", "Tháng 2", "Tháng 3"],
+            summary: {
+                revenue: [21213664770, 22370281393, 25006659252],
+                netRevenue: [16447978729, 17898707549, 20715995131],
+                grossProfit: [10639734427, 11564049466, 14025938831],
+                netProfit: [-10826144, 1068429882, 1123728119]
+            },
+            expenses: {
+                ads: [1105227512, 967939027, 1617014256],
+                platform: [2605488475, 2254970952, 3206557556],
+                ship: [266980826, 106874420, 515388492],
+                service: [5116263291, 5247574870, 5262664522],
+                salary: [3152975504, 3635098101, 2689803167],
+                other: [19394013414, 19046476946, 19030356181]
+            },
+            channels: {
+                off: { revenue: [0, 15766439000, 16442572570], grossProfit: [0, 8437475782, 9053449538], grossMargin: [0, 62.93, 63.73], totalExpense: [0, 7969627176, 8317069163], expenseRatio: [0, 59.44, 58.54] },
+                tmdt: { revenue: [0, 6292232739, 8011302352], grossProfit: [0, 1807508197, 2762310398], grossMargin: [0, 59.09, 64.38], totalExpense: [0, 965939218, 1209986010], expenseRatio: [0, 31.58, 28.20] },
+                online: { revenue: [0, 314420880, 483471970], grossProfit: [0, 201369611, 475376140], grossMargin: [0, 64.04, 98.33], totalExpense: [0, 399185993, 427134210], expenseRatio: [0, 126.96, 88.35] }
+            }
+        };
+
+        function fmt(v) { return (v/1e9).toFixed(1) + ' tỷ'; }
+
+        // KPIs
+        var last = 2;
+        document.getElementById('kpi-revenue').textContent = fmt(data.summary.revenue[last]);
+        document.getElementById('kpi-profit').textContent = fmt(data.summary.netProfit[last]);
+        document.getElementById('kpi-profit').className = 'kpi-value ' + (data.summary.netProfit[last] >= 0 ? 'positive' : 'negative');
+        var margin = (data.summary.netProfit[last] / data.summary.netRevenue[last] * 100);
+        document.getElementById('kpi-margin').textContent = margin.toFixed(1) + '%';
+
+        // Summary Table
+        var s = data.summary;
+        var sBody = document.querySelector('#summary-table tbody');
+        sBody.innerHTML =
+            '<tr><td>Doanh thu</td><td class="amount">' + fmt(s.revenue[0]) + '</td><td class="amount">' + fmt(s.revenue[1]) + '</td><td class="amount">' + fmt(s.revenue[2]) + '</td></tr>' +
+            '<tr><td>Doanh thu thuần</td><td class="amount">' + fmt(s.netRevenue[0]) + '</td><td class="amount">' + fmt(s.netRevenue[1]) + '</td><td class="amount">' + fmt(s.netRevenue[2]) + '</td></tr>' +
+            '<tr><td>Lợi nhuận gộp</td><td class="amount">' + fmt(s.grossProfit[0]) + '</td><td class="amount">' + fmt(s.grossProfit[1]) + '</td><td class="amount">' + fmt(s.grossProfit[2]) + '</td></tr>' +
+            '<tr><td>Lợi nhuận thuần</td><td class="amount">' + fmt(s.netProfit[0]) + '</td><td class="amount">' + fmt(s.netProfit[1]) + '</td><td class="amount">' + fmt(s.netProfit[2]) + '</td></tr>';
+
+        // Expense Table
+        var expNames = ['ads', 'platform', 'ship', 'service', 'salary', 'other'];
+        var expTitles = ['Quảng cáo', 'Nền tảng', 'Vận chuyển', 'Dịch vụ', 'Lương', 'Khác'];
+        var eBody = document.querySelector('#expense-table tbody');
+        eBody.innerHTML = expNames.map(function(key, i) {
+            return '<tr><td>' + expTitles[i] + '</td><td class="amount">' + fmt(data.expenses[key][0]) + '</td><td class="amount">' + fmt(data.expenses[key][1]) + '</td><td class="amount">' + fmt(data.expenses[key][2]) + '</td></tr>';
+        }).join('');
+
+        // Channel Table
+        var chNames = ['off', 'tmdt', 'online'];
+        var chTitles = {off: 'Cửa hàng OFF', tmdt: 'TMĐT', online: 'Online'};
+        var cBody = document.querySelector('#channel-table tbody');
+        cBody.innerHTML = chNames.map(function(c) {
+            return '<tr><td>' + chTitles[c] + '</td><td class="amount">' + fmt(data.channels[c].revenue[last]) + '</td><td class="amount">' + fmt(data.channels[c].grossProfit[last]) + '</td><td class="amount">' + data.channels[c].grossMargin[last].toFixed(1) + '%</td><td class="amount">' + fmt(data.channels[c].totalExpense[last]) + '</td><td class="amount">' + data.channels[c].expenseRatio[last].toFixed(1) + '%</td></tr>';
+        }).join('');
+    </script>
+</body>
+</html>

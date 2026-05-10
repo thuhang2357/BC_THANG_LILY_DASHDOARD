@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Dashboard</title>
+</head>
+<body>
+    <h1>Test Page</h1>
+    <div id="output">Loading...</div>
+    <script>
+        var data = {
+            "meta": {"company": "Công Ty Cổ Phần ULTD Thịnh Phát", "lastUpdated": "2026-05-08"},
+            "months": ["Tháng 1", "Tháng 2", "Tháng 3"],
+            "summary": {
+                "revenue": [21213664770, 22370281393, 25006659252],
+                "netProfit": [-10826144, 1068429882, 1123728119]
+            }
+        };
+        document.getElementById('output').innerHTML =
+            '<p>Công ty: ' + data.meta.company + '</p>' +
+            '<p>Tháng: ' + data.months.join(', ') + '</p>' +
+            '<p>Doanh thu tháng 3: ' + (data.summary.revenue[2]/1e9).toFixed(1) + ' tỷ</p>' +
+            '<p>Lợi nhuận tháng 3: ' + (data.summary.netProfit[2]/1e9).toFixed(1) + ' tỷ</p>';
+    </script>
+</body>
+</html>
